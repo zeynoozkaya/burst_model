@@ -1,0 +1,36 @@
+PSEUDO CODE ATTEMPT
+
+0.Initialize Cluster1, Cluster2:
+  define connectivity matrices : second diagonal (to ensure that it has only one "block") + random, sparse matrix of small density
+  assign basket cells to neurons in Cluster1/2 in an array [basket]
+
+1.Compute dynamics:
+  Initialize values of x1(0) and x2(0)
+  For i in range(T):
+    B = compute_basket_cells_step(Cluster1, Cluster2, B) # array of size n_baskets
+    compute_cluster_step(Cluster1/2, B, i)
+    compute_poisson_spiking(Cluster1/2)
+  spike_count1/2 = compute_spike_count(Cluster1/2) # arrays of size T. The spike counts measure the amplitude of activity in each cluster.
+
+compute_basket_cells_step(Cluster1, Cluster2, B):
+  for b in range(n_baskets):
+    y = array[x_i in Cluster1/2 s.t. basket(i)=y]
+    new_B[b] = B[b] + dt * (-B[b] + f(sum(y)))
+  return new_B
+
+compute_cluster_step(cluster, B, i)
+  cluster.compute_flow(B, i)
+  cluster.x[i+1] = cluster.x[i] + dt * cluster.flow[i]
+
+compute_flow(cluster, B, i):
+  I = np.where(cluster.basket_assignation==b, B[b])
+  cluster.flow[i] = - cluster.x[i] + f(w * cluster.x[i] + I)
+
+2.Compute contribution of each type of oscillations (Gamma and Beta) by performing a (continuous ?) Fourier transform:
+  for freq in frequencies_range:
+    for t in range(T):
+      Fourier_transform[freq][t] = compute_fourier_transform(spike_count1/2, freq, t) # should return the instantaneous amplitude of activity in each cluster that is accounted by frequency freq. Array of size (n_freq x T)
+
+Plot Gamma/Beta activity:
+  for freq in frequencies_range:
+    Plot Fourier_transform[freq]
